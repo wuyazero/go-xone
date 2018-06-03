@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
 package swarm
 
@@ -27,24 +27,24 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/contracts/chequebook"
-	"github.com/ethereum/go-ethereum/contracts/ens"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	httpapi "github.com/ethereum/go-ethereum/swarm/api/http"
-	"github.com/ethereum/go-ethereum/swarm/fuse"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/wuyazero/go-xone/accounts/abi/bind"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/contracts/chequebook"
+	"github.com/wuyazero/go-xone/contracts/ens"
+	"github.com/wuyazero/go-xone/crypto"
+	"github.com/wuyazero/go-xone/ethclient"
+	"github.com/wuyazero/go-xone/log"
+	"github.com/wuyazero/go-xone/metrics"
+	"github.com/wuyazero/go-xone/node"
+	"github.com/wuyazero/go-xone/p2p"
+	"github.com/wuyazero/go-xone/p2p/discover"
+	"github.com/wuyazero/go-xone/params"
+	"github.com/wuyazero/go-xone/rpc"
+	"github.com/wuyazero/go-xone/swarm/api"
+	httpapi "github.com/wuyazero/go-xone/swarm/api/http"
+	"github.com/wuyazero/go-xone/swarm/fuse"
+	"github.com/wuyazero/go-xone/swarm/network"
+	"github.com/wuyazero/go-xone/swarm/storage"
 )
 
 var (
