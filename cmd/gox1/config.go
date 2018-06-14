@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2017 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -27,12 +27,12 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/dashboard"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
+	"github.com/wuyazero/go-xone/cmd/utils"
+	"github.com/wuyazero/go-xone/dashboard"
+	"github.com/wuyazero/go-xone/eth"
+	"github.com/wuyazero/go-xone/node"
+	"github.com/wuyazero/go-xone/params"
+	whisper "github.com/wuyazero/go-xone/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 
@@ -74,7 +74,7 @@ type ethstatsConfig struct {
 	URL string `toml:",omitempty"`
 }
 
-type gethConfig struct {
+type gox1Config struct {
 	Eth       eth.Config
 	Shh       whisper.Config
 	Node      node.Config
@@ -82,7 +82,7 @@ type gethConfig struct {
 	Dashboard dashboard.Config
 }
 
-func loadConfig(file string, cfg *gethConfig) error {
+func loadConfig(file string, cfg *gox1Config) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -103,13 +103,13 @@ func defaultNodeConfig() node.Config {
 	cfg.Version = params.VersionWithCommit(gitCommit)
 	cfg.HTTPModules = append(cfg.HTTPModules, "eth", "shh")
 	cfg.WSModules = append(cfg.WSModules, "eth", "shh")
-	cfg.IPCPath = "geth.ipc"
+	cfg.IPCPath = "gox1.ipc"
 	return cfg
 }
 
-func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
+func makeConfigNode(ctx *cli.Context) (*node.Node, gox1Config) {
 	// Load defaults.
-	cfg := gethConfig{
+	cfg := gox1Config{
 		Eth:       eth.DefaultConfig,
 		Shh:       whisper.DefaultConfig,
 		Node:      defaultNodeConfig(),
@@ -171,7 +171,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		utils.RegisterShhService(stack, &cfg.Shh)
 	}
 
-	// Add the Ethereum Stats daemon if requested.
+	// Add the Xonechain Stats daemon if requested.
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}

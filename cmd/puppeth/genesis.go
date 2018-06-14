@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2017 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -21,16 +21,16 @@ import (
 	"errors"
 	"math"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/common/hexutil"
+	"github.com/wuyazero/go-xone/consensus/ethash"
+	"github.com/wuyazero/go-xone/core"
+	"github.com/wuyazero/go-xone/params"
 )
 
-// cppEthereumGenesisSpec represents the genesis specification format used by the
-// C++ Ethereum implementation.
-type cppEthereumGenesisSpec struct {
+// cppXonechainGenesisSpec represents the genesis specification format used by the
+// C++ Xonechain implementation.
+type cppXonechainGenesisSpec struct {
 	SealEngine string `json:"sealEngine"`
 	Params     struct {
 		AccountStartNonce       hexutil.Uint64 `json:"accountStartNonce"`
@@ -62,38 +62,38 @@ type cppEthereumGenesisSpec struct {
 		GasLimit   hexutil.Uint64 `json:"gasLimit"`
 	} `json:"genesis"`
 
-	Accounts map[common.Address]*cppEthereumGenesisSpecAccount `json:"accounts"`
+	Accounts map[common.Address]*cppXonechainGenesisSpecAccount `json:"accounts"`
 }
 
-// cppEthereumGenesisSpecAccount is the prefunded genesis account and/or precompiled
+// cppXonechainGenesisSpecAccount is the prefunded genesis account and/or precompiled
 // contract definition.
-type cppEthereumGenesisSpecAccount struct {
+type cppXonechainGenesisSpecAccount struct {
 	Balance     *hexutil.Big                   `json:"balance"`
 	Nonce       uint64                         `json:"nonce,omitempty"`
-	Precompiled *cppEthereumGenesisSpecBuiltin `json:"precompiled,omitempty"`
+	Precompiled *cppXonechainGenesisSpecBuiltin `json:"precompiled,omitempty"`
 }
 
-// cppEthereumGenesisSpecBuiltin is the precompiled contract definition.
-type cppEthereumGenesisSpecBuiltin struct {
+// cppXonechainGenesisSpecBuiltin is the precompiled contract definition.
+type cppXonechainGenesisSpecBuiltin struct {
 	Name          string                               `json:"name,omitempty"`
 	StartingBlock hexutil.Uint64                       `json:"startingBlock,omitempty"`
-	Linear        *cppEthereumGenesisSpecLinearPricing `json:"linear,omitempty"`
+	Linear        *cppXonechainGenesisSpecLinearPricing `json:"linear,omitempty"`
 }
 
-type cppEthereumGenesisSpecLinearPricing struct {
+type cppXonechainGenesisSpecLinearPricing struct {
 	Base uint64 `json:"base"`
 	Word uint64 `json:"word"`
 }
 
-// newCppEthereumGenesisSpec converts a go-ethereum genesis block into a Parity specific
+// newCppXonechainGenesisSpec converts a go-xone genesis block into a Parity specific
 // chain specification format.
-func newCppEthereumGenesisSpec(network string, genesis *core.Genesis) (*cppEthereumGenesisSpec, error) {
-	// Only ethash is currently supported between go-ethereum and cpp-ethereum
+func newCppXonechainGenesisSpec(network string, genesis *core.Genesis) (*cppXonechainGenesisSpec, error) {
+	// Only ethash is currently supported between go-xone and cpp-xonechain
 	if genesis.Config.Ethash == nil {
 		return nil, errors.New("unsupported consensus engine")
 	}
 	// Reconstruct the chain spec in Parity's format
-	spec := &cppEthereumGenesisSpec{
+	spec := &cppXonechainGenesisSpec{
 		SealEngine: "Ethash",
 	}
 	spec.Params.AccountStartNonce = 0
@@ -126,36 +126,36 @@ func newCppEthereumGenesisSpec(network string, genesis *core.Genesis) (*cppEther
 	spec.Genesis.ExtraData = (hexutil.Bytes)(genesis.ExtraData)
 	spec.Genesis.GasLimit = (hexutil.Uint64)(genesis.GasLimit)
 
-	spec.Accounts = make(map[common.Address]*cppEthereumGenesisSpecAccount)
+	spec.Accounts = make(map[common.Address]*cppXonechainGenesisSpecAccount)
 	for address, account := range genesis.Alloc {
-		spec.Accounts[address] = &cppEthereumGenesisSpecAccount{
+		spec.Accounts[address] = &cppXonechainGenesisSpecAccount{
 			Balance: (*hexutil.Big)(account.Balance),
 			Nonce:   account.Nonce,
 		}
 	}
-	spec.Accounts[common.BytesToAddress([]byte{1})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-		Name: "ecrecover", Linear: &cppEthereumGenesisSpecLinearPricing{Base: 3000},
+	spec.Accounts[common.BytesToAddress([]byte{1})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+		Name: "ecrecover", Linear: &cppXonechainGenesisSpecLinearPricing{Base: 3000},
 	}
-	spec.Accounts[common.BytesToAddress([]byte{2})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-		Name: "sha256", Linear: &cppEthereumGenesisSpecLinearPricing{Base: 60, Word: 12},
+	spec.Accounts[common.BytesToAddress([]byte{2})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+		Name: "sha256", Linear: &cppXonechainGenesisSpecLinearPricing{Base: 60, Word: 12},
 	}
-	spec.Accounts[common.BytesToAddress([]byte{3})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-		Name: "ripemd160", Linear: &cppEthereumGenesisSpecLinearPricing{Base: 600, Word: 120},
+	spec.Accounts[common.BytesToAddress([]byte{3})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+		Name: "ripemd160", Linear: &cppXonechainGenesisSpecLinearPricing{Base: 600, Word: 120},
 	}
-	spec.Accounts[common.BytesToAddress([]byte{4})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-		Name: "identity", Linear: &cppEthereumGenesisSpecLinearPricing{Base: 15, Word: 3},
+	spec.Accounts[common.BytesToAddress([]byte{4})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+		Name: "identity", Linear: &cppXonechainGenesisSpecLinearPricing{Base: 15, Word: 3},
 	}
 	if genesis.Config.ByzantiumBlock != nil {
-		spec.Accounts[common.BytesToAddress([]byte{5})].Precompiled = &cppEthereumGenesisSpecBuiltin{
+		spec.Accounts[common.BytesToAddress([]byte{5})].Precompiled = &cppXonechainGenesisSpecBuiltin{
 			Name: "modexp", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()),
 		}
-		spec.Accounts[common.BytesToAddress([]byte{6})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-			Name: "alt_bn128_G1_add", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()), Linear: &cppEthereumGenesisSpecLinearPricing{Base: 500},
+		spec.Accounts[common.BytesToAddress([]byte{6})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+			Name: "alt_bn128_G1_add", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()), Linear: &cppXonechainGenesisSpecLinearPricing{Base: 500},
 		}
-		spec.Accounts[common.BytesToAddress([]byte{7})].Precompiled = &cppEthereumGenesisSpecBuiltin{
-			Name: "alt_bn128_G1_mul", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()), Linear: &cppEthereumGenesisSpecLinearPricing{Base: 40000},
+		spec.Accounts[common.BytesToAddress([]byte{7})].Precompiled = &cppXonechainGenesisSpecBuiltin{
+			Name: "alt_bn128_G1_mul", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()), Linear: &cppXonechainGenesisSpecLinearPricing{Base: 40000},
 		}
-		spec.Accounts[common.BytesToAddress([]byte{8})].Precompiled = &cppEthereumGenesisSpecBuiltin{
+		spec.Accounts[common.BytesToAddress([]byte{8})].Precompiled = &cppXonechainGenesisSpecBuiltin{
 			Name: "alt_bn128_pairing_product", StartingBlock: (hexutil.Uint64)(genesis.Config.ByzantiumBlock.Uint64()),
 		}
 	}
@@ -201,10 +201,10 @@ type parityChainSpec struct {
 
 	Genesis struct {
 		Seal struct {
-			Ethereum struct {
+			Xonechain struct {
 				Nonce   hexutil.Bytes `json:"nonce"`
 				MixHash hexutil.Bytes `json:"mixHash"`
-			} `json:"ethereum"`
+			} `json:"xonechain"`
 		} `json:"seal"`
 
 		Difficulty *hexutil.Big   `json:"difficulty"`
@@ -256,10 +256,10 @@ type parityChainSpecAltBnPairingPricing struct {
 	Pair uint64 `json:"pair"`
 }
 
-// newParityChainSpec converts a go-ethereum genesis block into a Parity specific
+// newParityChainSpec converts a go-xone genesis block into a Parity specific
 // chain specification format.
 func newParityChainSpec(network string, genesis *core.Genesis, bootnodes []string) (*parityChainSpec, error) {
-	// Only ethash is currently supported between go-ethereum and Parity
+	// Only ethash is currently supported between go-xone and Parity
 	if genesis.Config.Ethash == nil {
 		return nil, errors.New("unsupported consensus engine")
 	}
@@ -294,10 +294,10 @@ func newParityChainSpec(network string, genesis *core.Genesis, bootnodes []strin
 	spec.Params.EIP214Transition = genesis.Config.ByzantiumBlock.Uint64()
 	spec.Params.EIP658Transition = genesis.Config.ByzantiumBlock.Uint64()
 
-	spec.Genesis.Seal.Ethereum.Nonce = (hexutil.Bytes)(make([]byte, 8))
-	binary.LittleEndian.PutUint64(spec.Genesis.Seal.Ethereum.Nonce[:], genesis.Nonce)
+	spec.Genesis.Seal.Xonechain.Nonce = (hexutil.Bytes)(make([]byte, 8))
+	binary.LittleEndian.PutUint64(spec.Genesis.Seal.Xonechain.Nonce[:], genesis.Nonce)
 
-	spec.Genesis.Seal.Ethereum.MixHash = (hexutil.Bytes)(genesis.Mixhash[:])
+	spec.Genesis.Seal.Xonechain.MixHash = (hexutil.Bytes)(genesis.Mixhash[:])
 	spec.Genesis.Difficulty = (*hexutil.Big)(genesis.Difficulty)
 	spec.Genesis.Author = genesis.Coinbase
 	spec.Genesis.Timestamp = (hexutil.Uint64)(genesis.Timestamp)
@@ -341,9 +341,9 @@ func newParityChainSpec(network string, genesis *core.Genesis, bootnodes []strin
 	return spec, nil
 }
 
-// pyEthereumGenesisSpec represents the genesis specification format used by the
-// Python Ethereum implementation.
-type pyEthereumGenesisSpec struct {
+// pyXonechainGenesisSpec represents the genesis specification format used by the
+// Python Xonechain implementation.
+type pyXonechainGenesisSpec struct {
 	Nonce      hexutil.Bytes     `json:"nonce"`
 	Timestamp  hexutil.Uint64    `json:"timestamp"`
 	ExtraData  hexutil.Bytes     `json:"extraData"`
@@ -355,14 +355,14 @@ type pyEthereumGenesisSpec struct {
 	ParentHash common.Hash       `json:"parentHash"`
 }
 
-// newPyEthereumGenesisSpec converts a go-ethereum genesis block into a Parity specific
+// newPyXonechainGenesisSpec converts a go-xone genesis block into a Parity specific
 // chain specification format.
-func newPyEthereumGenesisSpec(network string, genesis *core.Genesis) (*pyEthereumGenesisSpec, error) {
-	// Only ethash is currently supported between go-ethereum and pyethereum
+func newPyXonechainGenesisSpec(network string, genesis *core.Genesis) (*pyXonechainGenesisSpec, error) {
+	// Only ethash is currently supported between go-xone and pyxonechain
 	if genesis.Config.Ethash == nil {
 		return nil, errors.New("unsupported consensus engine")
 	}
-	spec := &pyEthereumGenesisSpec{
+	spec := &pyXonechainGenesisSpec{
 		Timestamp:  (hexutil.Uint64)(genesis.Timestamp),
 		ExtraData:  genesis.ExtraData,
 		GasLimit:   (hexutil.Uint64)(genesis.GasLimit),

@@ -1,25 +1,25 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
 package swarm
 
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/wuyazero/go-xone/common"
 )
 
 func TestParseEnsAPIAddress(t *testing.T) {
@@ -32,8 +32,8 @@ func TestParseEnsAPIAddress(t *testing.T) {
 	}{
 		{
 			description: "IPC endpoint",
-			value:       "/data/testnet/geth.ipc",
-			endpoint:    "/data/testnet/geth.ipc",
+			value:       "/data/testnet/gox1.ipc",
+			endpoint:    "/data/testnet/gox1.ipc",
 		},
 		{
 			description: "HTTP endpoint",
@@ -47,8 +47,8 @@ func TestParseEnsAPIAddress(t *testing.T) {
 		},
 		{
 			description: "IPC Endpoint and TLD",
-			value:       "test:/data/testnet/geth.ipc",
-			endpoint:    "/data/testnet/geth.ipc",
+			value:       "test:/data/testnet/gox1.ipc",
+			endpoint:    "/data/testnet/gox1.ipc",
 			tld:         "test",
 		},
 		{
@@ -65,8 +65,8 @@ func TestParseEnsAPIAddress(t *testing.T) {
 		},
 		{
 			description: "IPC Endpoint and contract address",
-			value:       "314159265dD8dbb310642f98f50C066173C1259b@/data/testnet/geth.ipc",
-			endpoint:    "/data/testnet/geth.ipc",
+			value:       "314159265dD8dbb310642f98f50C066173C1259b@/data/testnet/gox1.ipc",
+			endpoint:    "/data/testnet/gox1.ipc",
 			addr:        common.HexToAddress("314159265dD8dbb310642f98f50C066173C1259b"),
 		},
 		{
@@ -83,8 +83,8 @@ func TestParseEnsAPIAddress(t *testing.T) {
 		},
 		{
 			description: "IPC Endpoint, TLD and contract address",
-			value:       "test:314159265dD8dbb310642f98f50C066173C1259b@/data/testnet/geth.ipc",
-			endpoint:    "/data/testnet/geth.ipc",
+			value:       "test:314159265dD8dbb310642f98f50C066173C1259b@/data/testnet/gox1.ipc",
+			endpoint:    "/data/testnet/gox1.ipc",
 			addr:        common.HexToAddress("314159265dD8dbb310642f98f50C066173C1259b"),
 			tld:         "test",
 		},

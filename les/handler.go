@@ -1,20 +1,20 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package les implements the Light Ethereum Subprotocol.
+// Package les implements the Light Xonechain Subprotocol.
 package les
 
 import (
@@ -26,23 +26,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/consensus"
+	"github.com/wuyazero/go-xone/core"
+	"github.com/wuyazero/go-xone/core/rawdb"
+	"github.com/wuyazero/go-xone/core/state"
+	"github.com/wuyazero/go-xone/core/types"
+	"github.com/wuyazero/go-xone/eth/downloader"
+	"github.com/wuyazero/go-xone/ethdb"
+	"github.com/wuyazero/go-xone/event"
+	"github.com/wuyazero/go-xone/light"
+	"github.com/wuyazero/go-xone/log"
+	"github.com/wuyazero/go-xone/p2p"
+	"github.com/wuyazero/go-xone/p2p/discover"
+	"github.com/wuyazero/go-xone/p2p/discv5"
+	"github.com/wuyazero/go-xone/params"
+	"github.com/wuyazero/go-xone/rlp"
+	"github.com/wuyazero/go-xone/trie"
 )
 
 const (
@@ -126,8 +126,8 @@ type ProtocolManager struct {
 	wg *sync.WaitGroup
 }
 
-// NewProtocolManager returns a new ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
-// with the ethereum network.
+// NewProtocolManager returns a new xonechain sub protocol manager. The Xonechain sub protocol manages peers capable
+// with the xonechain network.
 func NewProtocolManager(chainConfig *params.ChainConfig, lightSync bool, protocolVersions []uint, networkId uint64, mux *event.TypeMux, engine consensus.Engine, peers *peerSet, blockchain BlockChain, txpool txPool, chainDb ethdb.Database, odr *LesOdr, txrelay *LesTxRelay, quitSync chan struct{}, wg *sync.WaitGroup) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
@@ -234,7 +234,7 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 func (pm *ProtocolManager) Stop() {
 	// Showing a log message. During download / process this could actually
 	// take between 5 to 10 seconds and therefor feedback is required.
-	log.Info("Stopping light Ethereum protocol")
+	log.Info("Stopping light Xonechain protocol")
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.
@@ -251,7 +251,7 @@ func (pm *ProtocolManager) Stop() {
 	// Wait for any process action
 	pm.wg.Wait()
 
-	log.Info("Light Ethereum protocol stopped")
+	log.Info("Light Xonechain protocol stopped")
 }
 
 func (pm *ProtocolManager) newPeer(pv int, nv uint64, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -266,7 +266,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 		return p2p.DiscTooManyPeers
 	}
 
-	p.Log().Debug("Light Ethereum peer connected", "name", p.Name())
+	p.Log().Debug("Light Xonechain peer connected", "name", p.Name())
 
 	// Execute the LES handshake
 	var (
@@ -277,7 +277,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 		td      = pm.blockchain.GetTd(hash, number)
 	)
 	if err := p.Handshake(td, hash, number, genesis.Hash(), pm.server); err != nil {
-		p.Log().Debug("Light Ethereum handshake failed", "err", err)
+		p.Log().Debug("Light Xonechain handshake failed", "err", err)
 		return err
 	}
 	if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
@@ -285,7 +285,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	}
 	// Register the peer locally
 	if err := pm.peers.Register(p); err != nil {
-		p.Log().Error("Light Ethereum peer registration failed", "err", err)
+		p.Log().Error("Light Xonechain peer registration failed", "err", err)
 		return err
 	}
 	defer func() {
@@ -325,7 +325,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	// main loop. handle incoming messages.
 	for {
 		if err := pm.handleMsg(p); err != nil {
-			p.Log().Debug("Light Ethereum message handling failed", "err", err)
+			p.Log().Debug("Light Xonechain message handling failed", "err", err)
 			return err
 		}
 	}
@@ -341,7 +341,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	if err != nil {
 		return err
 	}
-	p.Log().Trace("Light Ethereum message arrived", "code", msg.Code, "bytes", msg.Size)
+	p.Log().Trace("Light Xonechain message arrived", "code", msg.Code, "bytes", msg.Size)
 
 	costs := p.fcCosts[msg.Code]
 	reject := func(reqCnt, maxCnt uint64) bool {
@@ -1163,10 +1163,10 @@ func (pm *ProtocolManager) txStatus(hashes []common.Hash) []txStatus {
 	return stats
 }
 
-// NodeInfo represents a short summary of the Ethereum sub-protocol metadata
+// NodeInfo represents a short summary of the Xonechain sub-protocol metadata
 // known about the host peer.
 type NodeInfo struct {
-	Network    uint64              `json:"network"`    // Ethereum network ID (1=Frontier, 2=Morden, Ropsten=3, Rinkeby=4)
+	Network    uint64              `json:"network"`    // Xonechain network ID (1=Frontier, 2=Morden, Ropsten=3, Rinkeby=4)
 	Difficulty *big.Int            `json:"difficulty"` // Total difficulty of the host's blockchain
 	Genesis    common.Hash         `json:"genesis"`    // SHA3 hash of the host's genesis block
 	Config     *params.ChainConfig `json:"config"`     // Chain configuration for the fork rules

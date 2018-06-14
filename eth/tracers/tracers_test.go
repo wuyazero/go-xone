@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
 package tracers
 
@@ -25,19 +25,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/tests"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/common/hexutil"
+	"github.com/wuyazero/go-xone/common/math"
+	"github.com/wuyazero/go-xone/core"
+	"github.com/wuyazero/go-xone/core/types"
+	"github.com/wuyazero/go-xone/core/vm"
+	"github.com/wuyazero/go-xone/ethdb"
+	"github.com/wuyazero/go-xone/rlp"
+	"github.com/wuyazero/go-xone/tests"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into
-// a Geth console and call it with a transaction hash you which to export.
+// a GoX1 console and call it with a transaction hash you which to export.
 
 /*
 // makeTest generates a callTracer test by running a prestate reassembled and a

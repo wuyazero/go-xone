@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
 package ethash
 
@@ -24,22 +24,22 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/common/math"
+	"github.com/wuyazero/go-xone/consensus"
+	"github.com/wuyazero/go-xone/consensus/misc"
+	"github.com/wuyazero/go-xone/core/state"
+	"github.com/wuyazero/go-xone/core/types"
+	"github.com/wuyazero/go-xone/params"
 	set "gopkg.in/fatih/set.v0"
 )
 
 // Ethash proof-of-work protocol constants.
 var (
-	FrontierBlockReward    *big.Int = big.NewInt(5e+18) // Block reward in wei for successfully mining a block
-	ByzantiumBlockReward   *big.Int = big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
+	FrontierBlockReward    *big.Int = big.NewInt(0) // big.NewInt(5e+18) // Block reward in wei for successfully mining a block
+	ByzantiumBlockReward   *big.Int = big.NewInt(0) // big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
 	maxUncles                       = 2                 // Maximum number of uncles allowed in a single block
-	allowedFutureBlockTime          = 15 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
+	allowedFutureBlockTime          = 6 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
 )
 
 // Various error messages to mark blocks invalid. These should be private to
@@ -65,7 +65,7 @@ func (ethash *Ethash) Author(header *types.Header) (common.Address, error) {
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules of the
-// stock Ethereum ethash engine.
+// stock Xonechain ethash engine.
 func (ethash *Ethash) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 	// If we're running a full engine faking, accept any input as valid
 	if ethash.config.PowMode == ModeFullFake {
@@ -166,7 +166,7 @@ func (ethash *Ethash) verifyHeaderWorker(chain consensus.ChainReader, headers []
 }
 
 // VerifyUncles verifies that the given block's uncles conform to the consensus
-// rules of the stock Ethereum ethash engine.
+// rules of the stock Xonechain ethash engine.
 func (ethash *Ethash) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
 	// If we're running a full engine faking, accept any input as valid
 	if ethash.config.PowMode == ModeFullFake {
@@ -218,7 +218,7 @@ func (ethash *Ethash) VerifyUncles(chain consensus.ChainReader, block *types.Blo
 }
 
 // verifyHeader checks whether a header conforms to the consensus rules of the
-// stock Ethereum ethash engine.
+// stock Xonechain ethash engine.
 // See YP section 4.3.4. "Block Header Validity"
 func (ethash *Ethash) verifyHeader(chain consensus.ChainReader, header, parent *types.Header, uncle bool, seal bool) error {
 	// Ensure that the header's extra-data section is of a reasonable size
@@ -311,6 +311,7 @@ var (
 	expDiffPeriod = big.NewInt(100000)
 	big1          = big.NewInt(1)
 	big2          = big.NewInt(2)
+	big5          = big.NewInt(5)
 	big9          = big.NewInt(9)
 	big10         = big.NewInt(10)
 	bigMinus99    = big.NewInt(-99)
@@ -321,7 +322,7 @@ var (
 // the difficulty that a new block should have when created at time given the
 // parent block's time and difficulty. The calculation uses the Byzantium rules.
 func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
-	// https://github.com/ethereum/EIPs/issues/100.
+	// https://github.com/xonechain/EIPs/issues/100.
 	// algorithm:
 	// diff = (parent_diff +
 	//         (parent_diff / 2048 * max((2 if len(parent.uncles) else 1) - ((timestamp - parent.timestamp) // 9), -99))
@@ -336,7 +337,7 @@ func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
 
 	// (2 if len(parent_uncles) else 1) - (block_timestamp - parent_timestamp) // 9
 	x.Sub(bigTime, bigParentTime)
-	x.Div(x, big9)
+	x.Div(x, big5)
 	if parent.UncleHash == types.EmptyUncleHash {
 		x.Sub(big1, x)
 	} else {
@@ -355,24 +356,30 @@ func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
 	if x.Cmp(params.MinimumDifficulty) < 0 {
 		x.Set(params.MinimumDifficulty)
 	}
+
+/* removes the ice-age fake */
+
 	// calculate a fake block number for the ice-age delay:
-	//   https://github.com/ethereum/EIPs/pull/669
+	//   https://github.com/xonechain/EIPs/pull/669
 	//   fake_block_number = min(0, block.number - 3_000_000
-	fakeBlockNumber := new(big.Int)
-	if parent.Number.Cmp(big2999999) >= 0 {
-		fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big2999999) // Note, parent is 1 less than the actual block number
-	}
+//	fakeBlockNumber := new(big.Int)
+//	if parent.Number.Cmp(big2999999) >= 0 {
+//		fakeBlockNumber = fakeBlockNumber.Sub(parent.Number, big2999999) // Note, parent is 1 less than the actual block number
+//	}
+
+/* removes the "bomb" */
+
 	// for the exponential factor
-	periodCount := fakeBlockNumber
-	periodCount.Div(periodCount, expDiffPeriod)
+//	periodCount := fakeBlockNumber
+//	periodCount.Div(periodCount, expDiffPeriod)
 
 	// the exponential factor, commonly referred to as "the bomb"
 	// diff = diff + 2^(periodCount - 2)
-	if periodCount.Cmp(big1) > 0 {
-		y.Sub(periodCount, big2)
-		y.Exp(big2, y, nil)
-		x.Add(x, y)
-	}
+//	if periodCount.Cmp(big1) > 0 {
+//		y.Sub(periodCount, big2)
+//		y.Exp(big2, y, nil)
+//		x.Add(x, y)
+//	}
 	return x
 }
 
@@ -380,7 +387,7 @@ func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
 // the difficulty that a new block should have when created at time given the
 // parent block's time and difficulty. The calculation uses the Homestead rules.
 func calcDifficultyHomestead(time uint64, parent *types.Header) *big.Int {
-	// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
+	// https://github.com/xonechain/EIPs/blob/master/EIPS/eip-2.md
 	// algorithm:
 	// diff = (parent_diff +
 	//         (parent_diff / 2048 * max(1 - (block_timestamp - parent_timestamp) // 10, -99))
@@ -395,7 +402,7 @@ func calcDifficultyHomestead(time uint64, parent *types.Header) *big.Int {
 
 	// 1 - (block_timestamp - parent_timestamp) // 10
 	x.Sub(bigTime, bigParentTime)
-	x.Div(x, big10)
+	x.Div(x, big5)
 	x.Sub(big1, x)
 
 	// max(1 - (block_timestamp - parent_timestamp) // 10, -99)
@@ -411,17 +418,20 @@ func calcDifficultyHomestead(time uint64, parent *types.Header) *big.Int {
 	if x.Cmp(params.MinimumDifficulty) < 0 {
 		x.Set(params.MinimumDifficulty)
 	}
+
+/* removes the "bomb" */
+
 	// for the exponential factor
-	periodCount := new(big.Int).Add(parent.Number, big1)
-	periodCount.Div(periodCount, expDiffPeriod)
+//	periodCount := new(big.Int).Add(parent.Number, big1)
+//	periodCount.Div(periodCount, expDiffPeriod)
 
 	// the exponential factor, commonly referred to as "the bomb"
 	// diff = diff + 2^(periodCount - 2)
-	if periodCount.Cmp(big1) > 0 {
-		y.Sub(periodCount, big2)
-		y.Exp(big2, y, nil)
-		x.Add(x, y)
-	}
+//	if periodCount.Cmp(big1) > 0 {
+//		y.Sub(periodCount, big2)
+//		y.Exp(big2, y, nil)
+//		x.Add(x, y)
+//	}
 	return x
 }
 
@@ -446,15 +456,17 @@ func calcDifficultyFrontier(time uint64, parent *types.Header) *big.Int {
 		diff.Set(params.MinimumDifficulty)
 	}
 
-	periodCount := new(big.Int).Add(parent.Number, big1)
-	periodCount.Div(periodCount, expDiffPeriod)
-	if periodCount.Cmp(big1) > 0 {
+/* removes the "bomb" */
+
+//	periodCount := new(big.Int).Add(parent.Number, big1)
+//	periodCount.Div(periodCount, expDiffPeriod)
+//	if periodCount.Cmp(big1) > 0 {
 		// diff = diff + 2^(periodCount - 2)
-		expDiff := periodCount.Sub(periodCount, big2)
-		expDiff.Exp(big2, expDiff, nil)
-		diff.Add(diff, expDiff)
-		diff = math.BigMax(diff, params.MinimumDifficulty)
-	}
+//		expDiff := periodCount.Sub(periodCount, big2)
+//		expDiff.Exp(big2, expDiff, nil)
+//		diff.Add(diff, expDiff)
+//		diff = math.BigMax(diff, params.MinimumDifficulty)
+//	}
 	return diff
 }
 

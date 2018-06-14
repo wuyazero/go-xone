@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2016 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -28,22 +28,22 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/console"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/internal/debug"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/swarm"
-	bzzapi "github.com/ethereum/go-ethereum/swarm/api"
-	swarmmetrics "github.com/ethereum/go-ethereum/swarm/metrics"
+	"github.com/wuyazero/go-xone/accounts"
+	"github.com/wuyazero/go-xone/accounts/keystore"
+	"github.com/wuyazero/go-xone/cmd/utils"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/console"
+	"github.com/wuyazero/go-xone/crypto"
+	"github.com/wuyazero/go-xone/ethclient"
+	"github.com/wuyazero/go-xone/internal/debug"
+	"github.com/wuyazero/go-xone/log"
+	"github.com/wuyazero/go-xone/node"
+	"github.com/wuyazero/go-xone/p2p"
+	"github.com/wuyazero/go-xone/p2p/discover"
+	"github.com/wuyazero/go-xone/params"
+	"github.com/wuyazero/go-xone/swarm"
+	bzzapi "github.com/wuyazero/go-xone/swarm/api"
+	swarmmetrics "github.com/wuyazero/go-xone/swarm/metrics"
 
 	"gopkg.in/urfave/cli.v1"
 )
@@ -98,7 +98,7 @@ var (
 	}
 	SwarmSwapAPIFlag = cli.StringFlag{
 		Name:   "swap-api",
-		Usage:  "URL of the Ethereum API provider to use to settle SWAP payments",
+		Usage:  "URL of the Xonechain API provider to use to settle SWAP payments",
 		EnvVar: SWARM_ENV_SWAP_API,
 	}
 	SwarmSyncEnabledFlag = cli.BoolTFlag{
@@ -161,7 +161,7 @@ var (
 
 var defaultNodeConfig = node.DefaultConfig
 
-// This init function sets defaults so cmd/swarm can run alongside geth.
+// This init function sets defaults so cmd/swarm can run alongside gox1.
 func init() {
 	defaultNodeConfig.Name = clientIdentifier
 	defaultNodeConfig.Version = params.VersionWithCommit(gitCommit)
@@ -171,13 +171,13 @@ func init() {
 	utils.ListenPortFlag.Value = 30399
 }
 
-var app = utils.NewApp(gitCommit, "Ethereum Swarm")
+var app = utils.NewApp(gitCommit, "Xonechain Swarm")
 
 // This init function creates the cli.App.
 func init() {
 	app.Action = bzzd
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2013-2016 The go-ethereum Authors"
+	app.Copyright = "Copyright 2013-2016 The go-xone Authors"
 	app.Commands = []cli.Command{
 		{
 			Action:    version,
@@ -268,12 +268,12 @@ Manage the local chunk database.
 					Description: `
 Export a local chunk database as a tar archive (use - to send to stdout).
 
-    swarm db export ~/.ethereum/swarm/bzz-KEY/chunks chunks.tar
+    swarm db export ~/.xonechain/swarm/bzz-KEY/chunks chunks.tar
 
 The export may be quite large, consider piping the output through the Unix
 pv(1) tool to get a progress bar:
 
-    swarm db export ~/.ethereum/swarm/bzz-KEY/chunks - | pv > chunks.tar
+    swarm db export ~/.xonechain/swarm/bzz-KEY/chunks - | pv > chunks.tar
 `,
 				},
 				{
@@ -284,12 +284,12 @@ pv(1) tool to get a progress bar:
 					Description: `
 Import chunks from a tar archive into a local chunk database (use - to read from stdin).
 
-    swarm db import ~/.ethereum/swarm/bzz-KEY/chunks chunks.tar
+    swarm db import ~/.xonechain/swarm/bzz-KEY/chunks chunks.tar
 
 The import may be quite large, consider piping the input through the Unix
 pv(1) tool to get a progress bar:
 
-    pv chunks.tar | swarm db import ~/.ethereum/swarm/bzz-KEY/chunks -
+    pv chunks.tar | swarm db import ~/.xonechain/swarm/bzz-KEY/chunks -
 `,
 				},
 				{
@@ -405,13 +405,13 @@ func bzzd(ctx *cli.Context) error {
 	}
 
 	cfg := defaultNodeConfig
-	//geth only supports --datadir via command line
+	//gox1 only supports --datadir via command line
 	//in order to be consistent within swarm, if we pass --datadir via environment variable
-	//or via config file, we get the same directory for geth and swarm
+	//or via config file, we get the same directory for gox1 and swarm
 	if _, err := os.Stat(bzzconfig.Path); err == nil {
 		cfg.DataDir = bzzconfig.Path
 	}
-	//setup the ethereum node
+	//setup the xonechain node
 	utils.SetNodeConfig(ctx, &cfg)
 	stack, err := node.New(&cfg)
 	if err != nil {
@@ -420,7 +420,7 @@ func bzzd(ctx *cli.Context) error {
 	//a few steps need to be done after the config phase is completed,
 	//due to overriding behavior
 	initSwarmNode(bzzconfig, stack, ctx)
-	//register BZZ as node.Service in the ethereum node
+	//register BZZ as node.Service in the xonechain node
 	registerBzzService(bzzconfig, ctx, stack)
 	//start the node
 	utils.StartNode(stack)
@@ -464,7 +464,7 @@ func registerBzzService(bzzconfig *bzzapi.Config, ctx *cli.Context, stack *node.
 
 		return swarm.NewSwarm(ctx, swapClient, bzzconfig)
 	}
-	//register within the ethereum node
+	//register within the xonechain node
 	if err := stack.Register(boot); err != nil {
 		utils.Fatalf("Failed to register the Swarm service: %v", err)
 	}

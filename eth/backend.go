@@ -1,20 +1,20 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-xone Authors
+// This file is part of the go-xone library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-xone library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-xone library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-xone library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package eth implements the Ethereum protocol.
+// Package eth implements the Xonechain protocol.
 package eth
 
 import (
@@ -25,30 +25,30 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/eth/gasprice"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/wuyazero/go-xone/accounts"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/common/hexutil"
+	"github.com/wuyazero/go-xone/consensus"
+	"github.com/wuyazero/go-xone/consensus/clique"
+	"github.com/wuyazero/go-xone/consensus/ethash"
+	"github.com/wuyazero/go-xone/core"
+	"github.com/wuyazero/go-xone/core/bloombits"
+	"github.com/wuyazero/go-xone/core/rawdb"
+	"github.com/wuyazero/go-xone/core/types"
+	"github.com/wuyazero/go-xone/core/vm"
+	"github.com/wuyazero/go-xone/eth/downloader"
+	"github.com/wuyazero/go-xone/eth/filters"
+	"github.com/wuyazero/go-xone/eth/gasprice"
+	"github.com/wuyazero/go-xone/ethdb"
+	"github.com/wuyazero/go-xone/event"
+	"github.com/wuyazero/go-xone/internal/ethapi"
+	"github.com/wuyazero/go-xone/log"
+	"github.com/wuyazero/go-xone/miner"
+	"github.com/wuyazero/go-xone/node"
+	"github.com/wuyazero/go-xone/p2p"
+	"github.com/wuyazero/go-xone/params"
+	"github.com/wuyazero/go-xone/rlp"
+	"github.com/wuyazero/go-xone/rpc"
 )
 
 type LesServer interface {
@@ -58,13 +58,13 @@ type LesServer interface {
 	SetBloomBitsIndexer(bbIndexer *core.ChainIndexer)
 }
 
-// Ethereum implements the Ethereum full node service.
-type Ethereum struct {
+// Xonechain implements the Xonechain full node service.
+type Xonechain struct {
 	config      *Config
 	chainConfig *params.ChainConfig
 
 	// Channel for shutting down the service
-	shutdownChan chan bool // Channel for shutting down the Ethereum
+	shutdownChan chan bool // Channel for shutting down the Xonechain
 
 	// Handlers
 	txPool          *core.TxPool
@@ -94,16 +94,16 @@ type Ethereum struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 }
 
-func (s *Ethereum) AddLesServer(ls LesServer) {
+func (s *Xonechain) AddLesServer(ls LesServer) {
 	s.lesServer = ls
 	ls.SetBloomBitsIndexer(s.bloomIndexer)
 }
 
-// New creates a new Ethereum object (including the
-// initialisation of the common Ethereum object)
-func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
+// New creates a new Xonechain object (including the
+// initialisation of the common Xonechain object)
+func New(ctx *node.ServiceContext, config *Config) (*Xonechain, error) {
 	if config.SyncMode == downloader.LightSync {
-		return nil, errors.New("can't run eth.Ethereum in light sync mode, use les.LightEthereum")
+		return nil, errors.New("can't run eth.Xonechain in light sync mode, use les.LightXonechain")
 	}
 	if !config.SyncMode.IsValid() {
 		return nil, fmt.Errorf("invalid sync mode %d", config.SyncMode)
@@ -118,7 +118,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
-	eth := &Ethereum{
+	eth := &Xonechain{
 		config:         config,
 		chainDb:        chainDb,
 		chainConfig:    chainConfig,
@@ -133,12 +133,12 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks),
 	}
 
-	log.Info("Initialising Ethereum protocol", "versions", ProtocolVersions, "network", config.NetworkId)
+	log.Info("Initialising Xonechain protocol", "versions", ProtocolVersions, "network", config.NetworkId)
 
 	if !config.SkipBcVersionCheck {
 		bcVersion := rawdb.ReadDatabaseVersion(chainDb)
 		if bcVersion != core.BlockChainVersion && bcVersion != 0 {
-			return nil, fmt.Errorf("Blockchain DB version mismatch (%d / %d). Run geth upgradedb.\n", bcVersion, core.BlockChainVersion)
+			return nil, fmt.Errorf("Blockchain DB version mismatch (%d / %d). Run gox1 upgradedb.\n", bcVersion, core.BlockChainVersion)
 		}
 		rawdb.WriteDatabaseVersion(chainDb, core.BlockChainVersion)
 	}
@@ -184,7 +184,7 @@ func makeExtraData(extra []byte) []byte {
 		// create default extradata
 		extra, _ = rlp.EncodeToBytes([]interface{}{
 			uint(params.VersionMajor<<16 | params.VersionMinor<<8 | params.VersionPatch),
-			"geth",
+			"gox1",
 			runtime.Version(),
 			runtime.GOOS,
 		})
@@ -208,7 +208,7 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Data
 	return db, nil
 }
 
-// CreateConsensusEngine creates the required type of consensus engine instance for an Ethereum service
+// CreateConsensusEngine creates the required type of consensus engine instance for an Xonechain service
 func CreateConsensusEngine(ctx *node.ServiceContext, config *ethash.Config, chainConfig *params.ChainConfig, db ethdb.Database) consensus.Engine {
 	// If proof-of-authority is requested, set it up
 	if chainConfig.Clique != nil {
@@ -239,9 +239,9 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *ethash.Config, chai
 	}
 }
 
-// APIs return the collection of RPC services the ethereum package offers.
+// APIs return the collection of RPC services the xonechain package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
-func (s *Ethereum) APIs() []rpc.API {
+func (s *Xonechain) APIs() []rpc.API {
 	apis := ethapi.GetAPIs(s.APIBackend)
 
 	// Append any APIs exposed explicitly by the consensus engine
@@ -252,7 +252,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		{
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   NewPublicEthereumAPI(s),
+			Service:   NewPublicXonechainAPI(s),
 			Public:    true,
 		}, {
 			Namespace: "eth",
@@ -296,11 +296,11 @@ func (s *Ethereum) APIs() []rpc.API {
 	}...)
 }
 
-func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
+func (s *Xonechain) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *Ethereum) Etherbase() (eb common.Address, err error) {
+func (s *Xonechain) Etherbase() (eb common.Address, err error) {
 	s.lock.RLock()
 	etherbase := s.etherbase
 	s.lock.RUnlock()
@@ -324,7 +324,7 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 }
 
 // SetEtherbase sets the mining reward address.
-func (s *Ethereum) SetEtherbase(etherbase common.Address) {
+func (s *Xonechain) SetEtherbase(etherbase common.Address) {
 	s.lock.Lock()
 	s.etherbase = etherbase
 	s.lock.Unlock()
@@ -332,7 +332,7 @@ func (s *Ethereum) SetEtherbase(etherbase common.Address) {
 	s.miner.SetEtherbase(etherbase)
 }
 
-func (s *Ethereum) StartMining(local bool) error {
+func (s *Xonechain) StartMining(local bool) error {
 	eb, err := s.Etherbase()
 	if err != nil {
 		log.Error("Cannot start mining without etherbase", "err", err)
@@ -357,24 +357,24 @@ func (s *Ethereum) StartMining(local bool) error {
 	return nil
 }
 
-func (s *Ethereum) StopMining()         { s.miner.Stop() }
-func (s *Ethereum) IsMining() bool      { return s.miner.Mining() }
-func (s *Ethereum) Miner() *miner.Miner { return s.miner }
+func (s *Xonechain) StopMining()         { s.miner.Stop() }
+func (s *Xonechain) IsMining() bool      { return s.miner.Mining() }
+func (s *Xonechain) Miner() *miner.Miner { return s.miner }
 
-func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
-func (s *Ethereum) TxPool() *core.TxPool               { return s.txPool }
-func (s *Ethereum) EventMux() *event.TypeMux           { return s.eventMux }
-func (s *Ethereum) Engine() consensus.Engine           { return s.engine }
-func (s *Ethereum) ChainDb() ethdb.Database            { return s.chainDb }
-func (s *Ethereum) IsListening() bool                  { return true } // Always listening
-func (s *Ethereum) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
-func (s *Ethereum) NetVersion() uint64                 { return s.networkId }
-func (s *Ethereum) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
+func (s *Xonechain) AccountManager() *accounts.Manager  { return s.accountManager }
+func (s *Xonechain) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *Xonechain) TxPool() *core.TxPool               { return s.txPool }
+func (s *Xonechain) EventMux() *event.TypeMux           { return s.eventMux }
+func (s *Xonechain) Engine() consensus.Engine           { return s.engine }
+func (s *Xonechain) ChainDb() ethdb.Database            { return s.chainDb }
+func (s *Xonechain) IsListening() bool                  { return true } // Always listening
+func (s *Xonechain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
+func (s *Xonechain) NetVersion() uint64                 { return s.networkId }
+func (s *Xonechain) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
 
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.
-func (s *Ethereum) Protocols() []p2p.Protocol {
+func (s *Xonechain) Protocols() []p2p.Protocol {
 	if s.lesServer == nil {
 		return s.protocolManager.SubProtocols
 	}
@@ -382,8 +382,8 @@ func (s *Ethereum) Protocols() []p2p.Protocol {
 }
 
 // Start implements node.Service, starting all internal goroutines needed by the
-// Ethereum protocol implementation.
-func (s *Ethereum) Start(srvr *p2p.Server) error {
+// Xonechain protocol implementation.
+func (s *Xonechain) Start(srvr *p2p.Server) error {
 	// Start the bloom bits servicing goroutines
 	s.startBloomHandlers()
 
@@ -407,8 +407,8 @@ func (s *Ethereum) Start(srvr *p2p.Server) error {
 }
 
 // Stop implements node.Service, terminating all internal goroutines used by the
-// Ethereum protocol.
-func (s *Ethereum) Stop() error {
+// Xonechain protocol.
+func (s *Xonechain) Stop() error {
 	s.bloomIndexer.Close()
 	s.blockchain.Stop()
 	s.protocolManager.Stop()

@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2016 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/wuyazero/go-xone/params"
 )
 
 const (
@@ -40,25 +40,25 @@ const (
 func TestConsoleWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 
-	// Start a geth console, make sure it's cleaned up and terminate the console
-	geth := runGeth(t,
+	// Start a gox1 console, make sure it's cleaned up and terminate the console
+	gox1 := runGoX1(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh",
 		"console")
 
 	// Gather all the infos the welcome message needs to contain
-	geth.SetTemplateFunc("goos", func() string { return runtime.GOOS })
-	geth.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
-	geth.SetTemplateFunc("gover", runtime.Version)
-	geth.SetTemplateFunc("gethver", func() string { return params.Version })
-	geth.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
-	geth.SetTemplateFunc("apis", func() string { return ipcAPIs })
+	gox1.SetTemplateFunc("goos", func() string { return runtime.GOOS })
+	gox1.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
+	gox1.SetTemplateFunc("gover", runtime.Version)
+	gox1.SetTemplateFunc("gox1ver", func() string { return params.Version })
+	gox1.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
+	gox1.SetTemplateFunc("apis", func() string { return ipcAPIs })
 
 	// Verify the actual welcome message to the required template
-	geth.Expect(`
-Welcome to the Geth JavaScript console!
+	gox1.Expect(`
+Welcome to the GoX1 JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: GoX1/v{{gox1ver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -66,7 +66,7 @@ at block: 0 ({{niltime}})
 
 > {{.InputLine "exit"}}
 `)
-	geth.ExpectExit()
+	gox1.ExpectExit()
 }
 
 // Tests that a console can be attached to a running node via various means.
@@ -75,57 +75,57 @@ func TestIPCAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	var ipc string
 	if runtime.GOOS == "windows" {
-		ipc = `\\.\pipe\geth` + strconv.Itoa(trulyRandInt(100000, 999999))
+		ipc = `\\.\pipe\gox1` + strconv.Itoa(trulyRandInt(100000, 999999))
 	} else {
 		ws := tmpdir(t)
 		defer os.RemoveAll(ws)
-		ipc = filepath.Join(ws, "geth.ipc")
+		ipc = filepath.Join(ws, "gox1.ipc")
 	}
 	// Note: we need --shh because testAttachWelcome checks for default
 	// list of ipc modules and shh is included there.
-	geth := runGeth(t,
+	gox1 := runGoX1(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh", "--ipcpath", ipc)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "ipc:"+ipc, ipcAPIs)
+	testAttachWelcome(t, gox1, "ipc:"+ipc, ipcAPIs)
 
-	geth.Interrupt()
-	geth.ExpectExit()
+	gox1.Interrupt()
+	gox1.ExpectExit()
 }
 
 func TestHTTPAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
-	geth := runGeth(t,
+	gox1 := runGoX1(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--rpc", "--rpcport", port)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "http://localhost:"+port, httpAPIs)
+	testAttachWelcome(t, gox1, "http://localhost:"+port, httpAPIs)
 
-	geth.Interrupt()
-	geth.ExpectExit()
+	gox1.Interrupt()
+	gox1.ExpectExit()
 }
 
 func TestWSAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
 
-	geth := runGeth(t,
+	gox1 := runGoX1(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--ws", "--wsport", port)
 
 	time.Sleep(2 * time.Second) // Simple way to wait for the RPC endpoint to open
-	testAttachWelcome(t, geth, "ws://localhost:"+port, httpAPIs)
+	testAttachWelcome(t, gox1, "ws://localhost:"+port, httpAPIs)
 
-	geth.Interrupt()
-	geth.ExpectExit()
+	gox1.Interrupt()
+	gox1.ExpectExit()
 }
 
-func testAttachWelcome(t *testing.T, geth *testgeth, endpoint, apis string) {
-	// Attach to a running geth note and terminate immediately
-	attach := runGeth(t, "attach", endpoint)
+func testAttachWelcome(t *testing.T, gox1 *testgox1, endpoint, apis string) {
+	// Attach to a running gox1 note and terminate immediately
+	attach := runGoX1(t, "attach", endpoint)
 	defer attach.ExpectExit()
 	attach.CloseStdin()
 
@@ -133,18 +133,18 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint, apis string) {
 	attach.SetTemplateFunc("goos", func() string { return runtime.GOOS })
 	attach.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
 	attach.SetTemplateFunc("gover", runtime.Version)
-	attach.SetTemplateFunc("gethver", func() string { return params.Version })
-	attach.SetTemplateFunc("etherbase", func() string { return geth.Etherbase })
+	attach.SetTemplateFunc("gox1ver", func() string { return params.Version })
+	attach.SetTemplateFunc("etherbase", func() string { return gox1.Etherbase })
 	attach.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	attach.SetTemplateFunc("ipc", func() bool { return strings.HasPrefix(endpoint, "ipc") })
-	attach.SetTemplateFunc("datadir", func() string { return geth.Datadir })
+	attach.SetTemplateFunc("datadir", func() string { return gox1.Datadir })
 	attach.SetTemplateFunc("apis", func() string { return apis })
 
 	// Verify the actual welcome message to the required template
 	attach.Expect(`
-Welcome to the Geth JavaScript console!
+Welcome to the GoX1 JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: GoX1/v{{gox1ver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}

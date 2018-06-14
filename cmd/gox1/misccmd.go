@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2016 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/wuyazero/go-xone/cmd/utils"
+	"github.com/wuyazero/go-xone/consensus/ethash"
+	"github.com/wuyazero/go-xone/eth"
+	"github.com/wuyazero/go-xone/params"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -80,7 +80,7 @@ The output of this command is supposed to be machine-readable.
 func makecache(ctx *cli.Context) error {
 	args := ctx.Args()
 	if len(args) != 2 {
-		utils.Fatalf(`Usage: geth makecache <block number> <outputdir>`)
+		utils.Fatalf(`Usage: gox1 makecache <block number> <outputdir>`)
 	}
 	block, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
@@ -95,7 +95,7 @@ func makecache(ctx *cli.Context) error {
 func makedag(ctx *cli.Context) error {
 	args := ctx.Args()
 	if len(args) != 2 {
-		utils.Fatalf(`Usage: geth makedag <block number> <outputdir>`)
+		utils.Fatalf(`Usage: gox1 makedag <block number> <outputdir>`)
 	}
 	block, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
@@ -123,17 +123,17 @@ func version(ctx *cli.Context) error {
 }
 
 func license(_ *cli.Context) error {
-	fmt.Println(`Geth is free software: you can redistribute it and/or modify
+	fmt.Println(`GoX1 is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-Geth is distributed in the hope that it will be useful,
+GoX1 is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with geth. If not, see <http://www.gnu.org/licenses/>.`)
+along with gox1. If not, see <http://www.gnu.org/licenses/>.`)
 	return nil
 }

@@ -1,20 +1,20 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2014 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
-// geth is the official command-line client for Ethereum.
+// gox1 is the official command-line client for Xonechain.
 package main
 
 import (
@@ -25,28 +25,28 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/console"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/internal/debug"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/wuyazero/go-xone/accounts"
+	"github.com/wuyazero/go-xone/accounts/keystore"
+	"github.com/wuyazero/go-xone/cmd/utils"
+	"github.com/wuyazero/go-xone/console"
+	"github.com/wuyazero/go-xone/eth"
+	"github.com/wuyazero/go-xone/ethclient"
+	"github.com/wuyazero/go-xone/internal/debug"
+	"github.com/wuyazero/go-xone/log"
+	"github.com/wuyazero/go-xone/metrics"
+	"github.com/wuyazero/go-xone/node"
 	"gopkg.in/urfave/cli.v1"
 )
 
 const (
-	clientIdentifier = "geth" // Client identifier to advertise over the network
+	clientIdentifier = "gox1" // Client identifier to advertise over the network
 )
 
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
 	// The app that holds all commands and flags.
-	app = utils.NewApp(gitCommit, "the go-ethereum command line interface")
+	app = utils.NewApp(gitCommit, "the go-xone command line interface")
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
 		utils.IdentityFlag,
@@ -143,10 +143,10 @@ var (
 )
 
 func init() {
-	// Initialize the CLI app and start Geth
-	app.Action = geth
+	// Initialize the CLI app and start GoX1
+	app.Action = gox1
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2013-2018 The go-ethereum Authors"
+	app.Copyright = "Copyright 2013-2018 The go-xone Authors"
 	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		initCommand,
@@ -209,10 +209,10 @@ func main() {
 	}
 }
 
-// geth is the main entry point into the system if no special subcommand is ran.
+// gox1 is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
-func geth(ctx *cli.Context) error {
+func gox1(ctx *cli.Context) error {
 	node := makeFullNode(ctx)
 	startNode(ctx, node)
 	node.Wait()
@@ -281,26 +281,26 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	}()
 	// Start auxiliary services if enabled
 	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) || ctx.GlobalBool(utils.DeveloperFlag.Name) {
-		// Mining only makes sense if a full Ethereum node is running
+		// Mining only makes sense if a full Xonechain node is running
 		if ctx.GlobalBool(utils.LightModeFlag.Name) || ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
 			utils.Fatalf("Light clients do not support mining")
 		}
-		var ethereum *eth.Ethereum
-		if err := stack.Service(&ethereum); err != nil {
-			utils.Fatalf("Ethereum service not running: %v", err)
+		var xonechain *eth.Xonechain
+		if err := stack.Service(&xonechain); err != nil {
+			utils.Fatalf("Xonechain service not running: %v", err)
 		}
 		// Use a reduced number of threads if requested
 		if threads := ctx.GlobalInt(utils.MinerThreadsFlag.Name); threads > 0 {
 			type threaded interface {
 				SetThreads(threads int)
 			}
-			if th, ok := ethereum.Engine().(threaded); ok {
+			if th, ok := xonechain.Engine().(threaded); ok {
 				th.SetThreads(threads)
 			}
 		}
 		// Set the gas price to the limits from the CLI and start mining
-		ethereum.TxPool().SetGasPrice(utils.GlobalBig(ctx, utils.GasPriceFlag.Name))
-		if err := ethereum.StartMining(true); err != nil {
+		xonechain.TxPool().SetGasPrice(utils.GlobalBig(ctx, utils.GasPriceFlag.Name))
+		if err := xonechain.StartMining(true); err != nil {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}

@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2017 The go-xone Authors
+// This file is part of go-xone.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-xone is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-xone is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-xone. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -26,13 +26,13 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/wuyazero/go-xone/common"
+	"github.com/wuyazero/go-xone/log"
 )
 
-// nodeDockerfile is the Dockerfile required to run an Ethereum node.
+// nodeDockerfile is the Dockerfile required to run an Xonechain node.
 var nodeDockerfile = `
-FROM ethereum/client-go:latest
+FROM xonechain/client-go:latest
 
 ADD genesis.json /genesis.json
 {{if .Unlock}}
@@ -40,15 +40,15 @@ ADD genesis.json /genesis.json
 	ADD signer.pass /signer.pass
 {{end}}
 RUN \
-  echo 'geth --cache 512 init /genesis.json' > geth.sh && \{{if .Unlock}}
-	echo 'mkdir -p /root/.ethereum/keystore/ && cp /signer.json /root/.ethereum/keystore/' >> geth.sh && \{{end}}
-	echo $'geth --networkid {{.NetworkID}} --cache 512 --port {{.Port}} --maxpeers {{.Peers}} {{.LightFlag}} --ethstats \'{{.Ethstats}}\' {{if .Bootnodes}}--bootnodes {{.Bootnodes}}{{end}} {{if .Etherbase}}--etherbase {{.Etherbase}} --mine --minerthreads 1{{end}} {{if .Unlock}}--unlock 0 --password /signer.pass --mine{{end}} --targetgaslimit {{.GasTarget}} --gasprice {{.GasPrice}}' >> geth.sh
+  echo 'gox1 --cache 512 init /genesis.json' > gox1.sh && \{{if .Unlock}}
+	echo 'mkdir -p /root/.xonechain/keystore/ && cp /signer.json /root/.xonechain/keystore/' >> gox1.sh && \{{end}}
+	echo $'gox1 --networkid {{.NetworkID}} --cache 512 --port {{.Port}} --maxpeers {{.Peers}} {{.LightFlag}} --ethstats \'{{.Ethstats}}\' {{if .Bootnodes}}--bootnodes {{.Bootnodes}}{{end}} {{if .Etherbase}}--etherbase {{.Etherbase}} --mine --minerthreads 1{{end}} {{if .Unlock}}--unlock 0 --password /signer.pass --mine{{end}} --targetgaslimit {{.GasTarget}} --gasprice {{.GasPrice}}' >> gox1.sh
 
-ENTRYPOINT ["/bin/sh", "geth.sh"]
+ENTRYPOINT ["/bin/sh", "gox1.sh"]
 `
 
 // nodeComposefile is the docker-compose.yml file required to deploy and maintain
-// an Ethereum node (bootnode or miner for now).
+// an Xonechain node (bootnode or miner for now).
 var nodeComposefile = `
 version: '2'
 services:
@@ -59,7 +59,7 @@ services:
       - "{{.Port}}:{{.Port}}"
       - "{{.Port}}:{{.Port}}/udp"
     volumes:
-      - {{.Datadir}}:/root/.ethereum{{if .Ethashdir}}
+      - {{.Datadir}}:/root/.xonechain{{if .Ethashdir}}
       - {{.Ethashdir}}:/root/.ethash{{end}}
     environment:
       - PORT={{.Port}}/tcp
@@ -77,7 +77,7 @@ services:
     restart: always
 `
 
-// deployNode deploys a new Ethereum node container to a remote machine via SSH,
+// deployNode deploys a new Xonechain node container to a remote machine via SSH,
 // docker and docker-compose. If an instance with the specified network name
 // already exists there, it will be overwritten!
 func deployNode(client *sshClient, network string, bootnodes []string, config *nodeInfos, nocache bool) ([]byte, error) {
@@ -221,7 +221,7 @@ func checkNode(client *sshClient, network string, boot bool) (*nodeInfos, error)
 
 	// Container available, retrieve its node ID and its genesis json
 	var out []byte
-	if out, err = client.Run(fmt.Sprintf("docker exec %s_%s_1 geth --exec admin.nodeInfo.id attach", network, kind)); err != nil {
+	if out, err = client.Run(fmt.Sprintf("docker exec %s_%s_1 gox1 --exec admin.nodeInfo.id attach", network, kind)); err != nil {
 		return nil, ErrServiceUnreachable
 	}
 	id := bytes.Trim(bytes.TrimSpace(out), "\"")
@@ -246,7 +246,7 @@ func checkNode(client *sshClient, network string, boot bool) (*nodeInfos, error)
 	// Assemble and return the useful infos
 	stats := &nodeInfos{
 		genesis:    genesis,
-		datadir:    infos.volumes["/root/.ethereum"],
+		datadir:    infos.volumes["/root/.xonechain"],
 		ethashdir:  infos.volumes["/root/.ethash"],
 		port:       port,
 		peersTotal: totalPeers,

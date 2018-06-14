@@ -6123,7 +6123,7 @@ var stdlib = map[string]string{
 	"syscall.PTRACE_GETEVENTMSG":                           "syscall",
 	"syscall.PTRACE_GETFPREGS":                             "syscall",
 	"syscall.PTRACE_GETFPXREGS":                            "syscall",
-	"syscall.PTRACE_GETHBPREGS":                            "syscall",
+	"syscall.PTRACE_GOX1BPREGS":                            "syscall",
 	"syscall.PTRACE_GETREGS":                               "syscall",
 	"syscall.PTRACE_GETREGSET":                             "syscall",
 	"syscall.PTRACE_GETSIGINFO":                            "syscall",
