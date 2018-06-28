@@ -231,8 +231,10 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 func makeHeader(chain consensus.ChainReader, parent *types.Block, state *state.StateDB, engine consensus.Engine) *types.Header {
 	var time *big.Int
 	if parent.Time() == nil {
+		// xxxAdjustedxxx from 10
 		time = big.NewInt(5) // changed to 5
 	} else {
+		// xxxAdjustedxxx from 10
 		time = new(big.Int).Add(parent.Time(), big.NewInt(5)) // block time is fixed at 5 seconds
 	}
 
@@ -242,7 +244,8 @@ func makeHeader(chain consensus.ChainReader, parent *types.Block, state *state.S
 		Coinbase:   parent.Coinbase(),
 		Difficulty: engine.CalcDifficulty(chain, time.Uint64(), &types.Header{
 			Number:     parent.Number(),
-			Time:       new(big.Int).Sub(time, big.NewInt(10)),
+			// xxxAdjustedxxx from 10
+			Time:       new(big.Int).Sub(time, big.NewInt(5)),
 			Difficulty: parent.Difficulty(),
 			UncleHash:  parent.UncleHash(),
 		}),

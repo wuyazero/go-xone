@@ -36,9 +36,12 @@ import (
 
 // Ethash proof-of-work protocol constants.
 var (
+	// xxxAdjustedxxx from 5e+18
 	FrontierBlockReward    *big.Int = big.NewInt(0) // big.NewInt(5e+18) // Block reward in wei for successfully mining a block
+	// xxxAdjustedxxx from 3e+18
 	ByzantiumBlockReward   *big.Int = big.NewInt(0) // big.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
 	maxUncles                       = 2                 // Maximum number of uncles allowed in a single block
+	// xxxAdjustedxxx from 15
 	allowedFutureBlockTime          = 6 * time.Second  // Max time from current time allowed for blocks, before they're considered future blocks
 )
 
@@ -337,6 +340,7 @@ func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
 
 	// (2 if len(parent_uncles) else 1) - (block_timestamp - parent_timestamp) // 9
 	x.Sub(bigTime, bigParentTime)
+	// xxxAdjustedxxx from 9
 	x.Div(x, big5)
 	if parent.UncleHash == types.EmptyUncleHash {
 		x.Sub(big1, x)
@@ -356,6 +360,8 @@ func calcDifficultyByzantium(time uint64, parent *types.Header) *big.Int {
 	if x.Cmp(params.MinimumDifficulty) < 0 {
 		x.Set(params.MinimumDifficulty)
 	}
+
+// xxxAdjustedxxx
 
 /* removes the ice-age fake */
 
@@ -402,6 +408,7 @@ func calcDifficultyHomestead(time uint64, parent *types.Header) *big.Int {
 
 	// 1 - (block_timestamp - parent_timestamp) // 10
 	x.Sub(bigTime, bigParentTime)
+	//xxxAdjustedxxx from 10
 	x.Div(x, big5)
 	x.Sub(big1, x)
 
@@ -418,6 +425,9 @@ func calcDifficultyHomestead(time uint64, parent *types.Header) *big.Int {
 	if x.Cmp(params.MinimumDifficulty) < 0 {
 		x.Set(params.MinimumDifficulty)
 	}
+
+
+// xxxAdjustedxxx
 
 /* removes the "bomb" */
 
